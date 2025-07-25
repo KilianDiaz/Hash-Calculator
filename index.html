@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang="title">Calculadora de Hashes</title>
+	    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .language-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin:  8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-btn:hover, .language-btn.active {
+            background: var(--success-gradient);
+            transform: scale(1.05);
+            color: white;
+        }
+.flag-icon {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+}
+
+.flag-es {
+    background: linear-gradient(to bottom, #aa151b 33%, #f1bf00 33%, #f1bf00 66%, #aa151b 66%);
+}
+
+.flag-en {
+    background: repeating-linear-gradient(
+        to bottom,
+        #b22234,           /* rojo */
+        #b22234 1px,
+        white 1px,
+        white 2px
+    );
+}
+
+.flag-en::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 7px;
+    background-color: #3c3b6e; /* azul */
+    background-image: radial-gradient(white 0.4px, transparent 0.4px);
+    background-size: 2px 2px;
+}
+
+        .drop-zone {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .drop-zone:hover::before {
+            transform: translateX(100%);
+        }
+
+        .drop-zone.drag-over {
+            border-color: #00f2fe;
+            background: rgba(0, 242, 254, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-zone i {
+            font-size: 4rem;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hash-result {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hash-result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .hash-result:hover::before {
+            left: 100%;
+        }
+
+        .hash-result:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .hash-md5 { border-left-color: #ff6b6b; }
+        .hash-sha1 { border-left-color: #4ecdc4; }
+        .hash-sha256 { border-left-color: #45b7d1; }
+        .hash-sha384 { border-left-color: #96ceb4; }
+        .hash-sha512 { border-left-color: #ffeaa7; }
+        .hash-crc32 { border-left-color: #fd79a8; }
+
+        .copy-btn {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--success-gradient);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .file-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-custom {
+            background: var(--secondary-gradient);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+		
+        footer {
+            background: rgba(0, 0, 0, 0.8) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-gradient);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .language-selector {
+                position: relative;
+                top: 0;
+                right: 0;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Selector de Idiomas / Language Selector -->
+    <div class="language-selector">
+		<button class="language-btn" onclick="languageManager.setLanguage('en')" id="btn-en">
+            <i class="flag-icon flag-en"></i> EN
+        </button>
+        <button class="language-btn" onclick="languageManager.setLanguage('es')" id="btn-es">
+            <i class="flag-icon flag-es"></i> ES
+        </button>
+    </div>
+	
+
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="glass-card p-5">
+                    <h1 class="text-center mb-4 text-gradient">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        <span data-lang="title">Calculadora de Hashes</span>
+                    </h1>
+                    <p class="text-center text-white-50 mb-5" data-lang="subtitle">
+                        Calcula MD5, CRC32, SHA1, SHA256, SHA384 y SHA512 de tus archivos de forma segura y rápida
+                    </p>
+
+                    <div class="drop-zone" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4 class="text-white mb-3" data-lang="drag-text">Arrastra tu archivo aquí</h4>
+                        <p class="text-white-50 mb-3" data-lang="or-text">o</p>
+                        <button class="btn btn-custom" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open me-2"></i><span data-lang="select-file">Seleccionar archivo</span>
+                        </button>
+                        <input type="file" id="fileInput" style="display: none;">
+                    </div>
+
+                    <div class="progress-container" id="progressContainer">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-white" data-lang="calculating">Calculando hashes...</span>
+                            <span class="text-white" id="progressText">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="fileInfo" class="file-info" style="display: none;">
+                        <h5 class="text-white mb-3">
+                            <i class="fas fa-file me-2"></i><span data-lang="file-info">Información del archivo</span>
+                        </h5>
+                        <div class="row text-white-50">
+                            <div class="col-md-6">
+                                <strong data-lang="file-name">Nombre:</strong> <span id="fileName"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong data-lang="file-size">Tamaño:</strong> <span id="fileSize"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="results" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2025 Kilian Diaz.</p>
+            <div class="mt-2">
+                <a href="https://github.com/KilianDiaz" class="text-white me-3"><i class="fab fa-github"></i></a>
+                <a href="https://x.com/kiliand098" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+<a href="https://kiliandiaz.github.io/" class="text-white" target="_blank">
+  <img src="icon.png" alt="Icono personal" style="width: 20px; height: 20px;">
+</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle me-2"></i>
+        <span id="toastMessage">Hash copiado al portapapeles</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // Traduciones / Translations
+        class LanguageManager {
+            constructor() {
+                this.currentLanguage = 'es';
+                this.translations = {
+                    es: {
+                        'title': 'Calculadora de Hashes',
+                        'subtitle': 'Calcula MD5, CRC32, SHA1, SHA256, SHA384 y SHA512 de tus archivos de forma segura y rápida',
+                        'drag-text': 'Arrastra tu archivo aquí',
+                        'or-text': 'o',
+                        'select-file': 'Seleccionar archivo',
+                        'calculating': 'Calculando hashes...',
+                        'file-info': 'Información del archivo',
+                        'file-name': 'Nombre:',
+                        'file-size': 'Tamaño:',
+                        'copy-success': 'Hash {algorithm} copiado al portapapeles',
+                        'copy-error': 'Error al copiar al portapapeles',
+                        'process-error': 'Error al procesar el archivo',
+                        'bytes': 'Bytes',
+                        'kb': 'KB',
+                        'mb': 'MB',
+                        'gb': 'GB',
+                        'tb': 'TB'
+                    },
+                    en: {
+                        'title': 'Hash Calculator',
+                        'subtitle': 'Calculate MD5, CRC32, SHA1, SHA256, SHA384 and SHA512 of your files securely and quickly',
+                        'drag-text': 'Drag your file here',
+                        'or-text': 'or',
+                        'select-file': 'Select file',
+                        'calculating': 'Calculating hashes...',
+                        'file-info': 'File Information',
+                        'file-name': 'Name:',
+                        'file-size': 'Size:',
+                        'copy-success': '{algorithm} hash copied to clipboard',
+                        'copy-error': 'Error copying to clipboard',
+                        'process-error': 'Error processing file',
+                        'bytes': 'Bytes',
+                        'kb': 'KB',
+                        'mb': 'MB',
+                        'gb': 'GB',
+                        'tb': 'TB'
+                    }
+                };
+                this.init();
+            }
+
+            init() {
+                // Deteccion de Lenguaje del navegador / Browser Language Detection
+                const browserLang = navigator.language || navigator.userLanguage;
+                const detectedLang = browserLang.startsWith('en') ? 'en' : 'es';
+                const savedLang = localStorage.getItem('preferred-language');
+                this.setLanguage(savedLang || detectedLang);
+            }
+
+            setLanguage(lang) {
+                this.currentLanguage = lang;
+                localStorage.setItem('preferred-language', lang);
+                this.updateUI();
+                this.updateActiveButton();
+                document.documentElement.lang = lang;
+            }
+
+            updateUI() {
+                const elements = document.querySelectorAll('[data-lang]');
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-lang');
+                    if (this.translations[this.currentLanguage][key]) {
+                        element.textContent = this.translations[this.currentLanguage][key];
+                    }
+                });
+            }
+
+            updateActiveButton() {
+                document.querySelectorAll('.language-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(`btn-${this.currentLanguage}`).classList.add('active');
+            }
+
+            getText(key, params = {}) {
+                let text = this.translations[this.currentLanguage][key] || key;
+                Object.keys(params).forEach(param => {
+                    text = text.replace(`{${param}}`, params[param]);
+                });
+                return text;
+            }
+
+            getFileSizeUnits() {
+                return [
+                    this.getText('bytes'),
+                    this.getText('kb'),
+                    this.getText('mb'),
+                    this.getText('gb'),
+                    this.getText('tb')
+                ];
+            }
+        }
+
+        class HashCalculator {
+            constructor() {
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                const dropZone = document.getElementById('dropZone');
+                const fileInput = document.getElementById('fileInput');
+
+                // evento de envio de archivo / file upload event
+                dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
+                dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                dropZone.addEventListener('drop', this.handleDrop.bind(this));
+                fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('drag-over');
+            }
+
+            handleDragLeave(e) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            async processFile(file) {
+                this.showFileInfo(file);
+                this.showProgress();
+                
+                try {
+                    const buffer = await this.readFileAsArrayBuffer(file);
+                    await this.calculateHashes(buffer, file.name);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    this.showError(languageManager.getText('process-error'));
+                } finally {
+                    this.hideProgress();
+                }
+            }
+
+            showFileInfo(file) {
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileInfo').classList.add('animate-fade-in');
+            }
+
+            showProgress() {
+                document.getElementById('progressContainer').style.display = 'block';
+                document.getElementById('progressContainer').classList.add('animate-fade-in');
+            }
+
+            hideProgress() {
+                document.getElementById('progressContainer').style.display = 'none';
+            }
+
+            updateProgress(percentage) {
+                document.getElementById('progressBar').style.width = percentage + '%';
+                document.getElementById('progressText').textContent = Math.round(percentage) + '%';
+            }
+
+            readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            async calculateHashes(buffer, fileName) {
+                const uint8Array = new Uint8Array(buffer);
+                const results = document.getElementById('results');
+                results.innerHTML = '';
+
+                const hashes = [
+                    { name: 'MD5', class: 'hash-md5', func: () => CryptoJS.MD5(CryptoJS.lib.WordArray.create(uint8Array)).toString() },
+                    { name: 'SHA1', class: 'hash-sha1', func: () => CryptoJS.SHA1(CryptoJS.lib.WordArray.create(uint8Array)).toString() },
+                    { name: 'SHA256', class: 'hash-sha256', func: () => CryptoJS.SHA256(CryptoJS.lib.WordArray.create(uint8Array)).toString() },
+                    { name: 'SHA384', class: 'hash-sha384', func: () => CryptoJS.SHA384(CryptoJS.lib.WordArray.create(uint8Array)).toString() },
+                    { name: 'SHA512', class: 'hash-sha512', func: () => CryptoJS.SHA512(CryptoJS.lib.WordArray.create(uint8Array)).toString() },
+                    { name: 'CRC32', class: 'hash-crc32', func: () => this.calculateCRC32(uint8Array) }
+                ];
+
+                for (let i = 0; i < hashes.length; i++) {
+                    this.updateProgress((i / hashes.length) * 100);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    const hash = hashes[i];
+                    const value = hash.func();
+                    this.displayHash(hash.name, value, hash.class);
+                }
+
+                this.updateProgress(100);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            calculateCRC32(uint8Array) {
+                let crc = 0xFFFFFFFF;
+                const table = this.generateCRC32Table();
+                
+                for (let i = 0; i < uint8Array.length; i++) {
+                    const byte = uint8Array[i];
+                    crc = table[(crc ^ byte) & 0xFF] ^ (crc >>> 8);
+                }
+                
+                return ((crc ^ 0xFFFFFFFF) >>> 0).toString(16).toUpperCase().padStart(8, '0');
+            }
+
+            generateCRC32Table() {
+                if (this.crc32Table) return this.crc32Table;
+                
+                this.crc32Table = [];
+                for (let i = 0; i < 256; i++) {
+                    let crc = i;
+                    for (let j = 0; j < 8; j++) {
+                        crc = (crc & 1) ? (0xEDB88320 ^ (crc >>> 1)) : (crc >>> 1);
+                    }
+                    this.crc32Table[i] = crc;
+                }
+                return this.crc32Table;
+            }
+
+            displayHash(algorithm, hash, className) {
+                const results = document.getElementById('results');
+                const hashDiv = document.createElement('div');
+                hashDiv.className = `hash-result ${className} animate-fade-in`;
+                hashDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-white">${algorithm}:</strong>
+                            <div class="text-white-50 mt-1">${hash}</div>
+                        </div>
+                        <button class="copy-btn" onclick="hashCalculator.copyToClipboard('${hash}', '${algorithm}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `;
+                results.appendChild(hashDiv);
+            }
+
+            async copyToClipboard(text, algorithm) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.showToast(languageManager.getText('copy-success', {algorithm}));
+                } catch (err) {
+                    console.error('Error copying to clipboard:', err);
+                    this.showToast(languageManager.getText('copy-error'), true);
+                }
+            }
+
+            showToast(message, isError = false) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.style.background = isError ? 
+                    'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)' : 
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+                
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            showError(message) {
+                const results = document.getElementById('results');
+                results.innerHTML = `
+                    <div class="alert alert-danger animate-fade-in">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${message}
+                    </div>
+                `;
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 ' + languageManager.getText('bytes');
+                const k = 1024;
+                const sizes = languageManager.getFileSizeUnits();
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }
+
+        // inicializacion / initialization
+        const languageManager = new LanguageManager();
+        const hashCalculator = new HashCalculator();
+    </script>
+</body>
+</html>
